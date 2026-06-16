@@ -1,117 +1,117 @@
 
-# Models
+Models
 
 This folder contains the machine learning models developed for the **Karachi Environmental Intelligence System**.
 
-## Overview
+Overview
 
 The objective of these models is to forecast future environmental trends in Karachi using historical data from **2000 to 2025**. The forecasting period covers **2025 to 2035**.
 
 Three major environmental indicators were modeled:
 
-* Average Annual Temperature
-* Tree Cover Loss
-* Mangrove Area
+- Average Annual Temperature
+- Tree Cover Loss
+- Mangrove Area
 
-## Models Implemented
+Models Implemented
 
-### 1. Temperature Forecasting
+1. Temperature Forecasting
 
-**Objective:**
+Objective:
 Predict future average annual temperatures in Karachi to assess long-term climate trends and environmental warming.
 
-**Input Feature:**
+Input Feature:
 
-* Year
+- Year
 
-**Target Variable:**
+Target Variable:
 
-* Average Temperature (`avg_temperature`)
+- Average Temperature (`avg_temperature`)
 
-**Models Tested:**
+Models Tested:
 
-* Linear Regression
-* Random Forest Regressor
+- Linear Regression
+- Random Forest Regressor
 
-**Selected Model:**
-Linear Regression
+Selected Model:
+- Linear Regression
 
 ---
 
-### 2. Tree Cover Loss Forecasting
+2. Tree Cover Loss Forecasting
 
-**Objective:**
+Objective:
 Forecast future tree cover loss and evaluate the impact of urbanization and environmental degradation.
 
-**Input Feature:**
+Input Feature:
 
-* Year
+- Year
 
-**Target Variable:**
+Target Variable:
 
-* Tree Cover Loss (`tree_cover_loss_ha`)
+- Tree Cover Loss (`tree_cover_loss_ha`)
 
-**Models Tested:**
+Models Tested:
 
-* Linear Regression
-* Random Forest Regressor
+- Linear Regression
+- Random Forest Regressor
 
-**Selected Model:**
-Random Forest Regressor
+Selected Model:
+- Random Forest Regressor
 
 ---
 
-### 3. Mangrove Area Forecasting
+3. Mangrove Area Forecasting
 
-**Objective:**
+Objective:
 Predict future mangrove coverage and assess the effectiveness of restoration and conservation initiatives.
 
-**Input Feature:**
+Input Feature:
 
-* Year
+- Year
 
-**Target Variable:**
+Target Variable:
 
-* Mangrove Area (`mangrove_area_ha`)
+- Mangrove Area (`mangrove_area_ha`)
 
-**Models Tested:**
+Models Tested:
 
-* Linear Regression
-* Random Forest Regressor
+- Linear Regression
+- Random Forest Regressor
 
-**Selected Model:**
-Random Forest Regressor
+Selected Model:
+- Random Forest Regressor
 
 ---
 
-## Evaluation Metrics
+Evaluation Metrics
 
 The models were evaluated using:
 
-* **R² Score** – Measures how well the model explains the variability in the data.
-* **MAE (Mean Absolute Error)** – Measures the average prediction error.
-* **RMSE (Root Mean Squared Error)** – Measures the magnitude of prediction errors, giving higher penalties to larger errors.
+- **R² Score** – Measures how well the model explains the variability in the data.
+- **MAE (Mean Absolute Error)** – Measures the average prediction error.
+- **RMSE (Root Mean Squared Error)** – Measures the magnitude of prediction errors, giving higher penalties to larger errors.
 
 ---
 
-## Forecast Horizon
+Forecast Horizon
 
 All models generate forecasts for:
 
-**2025 – 2035**
+2025 – 2035
 
 The predictions are later integrated into the Environmental Risk Assessment framework to estimate future environmental risk levels for Karachi.
 
 ---
 
-## Project Context
+Project Context
 
 These models are part of the **Karachi Environmental Intelligence System**, which combines:
 
-* Climate Data
-* Forest Cover Data
-* Mangrove Ecosystem Data
-* Environmental Forecasting
-* Environmental Risk Assessment
+- Climate Data
+- Forest Cover Data
+- Mangrove Ecosystem Data
+- Environmental Forecasting
+- Environmental Risk Assessment
 
 to provide a unified understanding of Karachi's environmental conditions and future sustainability challenges.
