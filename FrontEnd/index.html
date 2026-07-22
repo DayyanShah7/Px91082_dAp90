@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karachi Intelligence System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="hero">
+
+  <div class="bg-vignette" aria-hidden="true"></div>
+  <div class="bg-grain" aria-hidden="true"></div>
+
+  <div class="word">
+
+    <!-- hidden SVG: defines the mask shape (the letters).
+         textLength + lengthAdjust locks the word to a fixed width
+         so it always fits inside the frame, no matter the font metrics. -->
+    <svg class="mask-defs" width="0" height="0" aria-hidden="true">
+      <defs>
+        <mask id="textMask">
+          <rect x="0" y="0" width="1000" height="300" fill="black"/>
+          <text x="500" y="212" text-anchor="middle"
+                font-family="'Archivo Black', sans-serif" font-size="200"
+                textLength="900" lengthAdjust="spacingAndGlyphs" fill="white">KARACHI</text>
+        </mask>
+      </defs>
+    </svg>
+
+    <!-- video, visible ONLY inside the letters because of the mask above -->
+    <div class="mask-wrap">
+      <video class="bg-video" autoplay muted loop playsinline>
+        <!-- ============================================================ -->
+        <!--  VIDEO GOES HERE — change ONLY this line to swap the video   -->
+        <source src="karachi-loop.mp4" type="video/mp4">
+        <!-- ============================================================ -->
+      </video>
+    </div>
+
+    <!-- outline drawn on top, same letters, same textLength, so edges line up exactly -->
+    <svg class="outline-svg" viewBox="0 0 1000 300" aria-hidden="true">
+      <text x="500" y="212" text-anchor="middle"
+            font-family="'Archivo Black', sans-serif" font-size="200"
+            textLength="900" lengthAdjust="spacingAndGlyphs"
+            fill="none" stroke="#F3E9D2" stroke-width="8" stroke-linejoin="round">KARACHI</text>
+    </svg>
+
+  </div>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
