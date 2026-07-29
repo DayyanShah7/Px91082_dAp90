@@ -142,13 +142,402 @@ html, body{ width:100%; height:100%; background:var(--green-900); }
   position:relative;
   z-index:1;
   background:#ffffff;
-  min-height:100vh;
-  padding: 10vh;
+  /*min-height:100vh;
+  padding: 10vh;*/
 }
 .content-inner{
   max-width:1200px;
-  margin:0 auto;
-  padding: 6rem 1.5rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
   color:#1c1c1c;
   font-family: 'Montserrat', sans-serif;
+  
+}
+.content-inner p {
+  margin: 10px 0;
+}
+
+  /* ---------- the scroll stage ---------- */
+  .plot-stage{ position:relative; height:420vh; }
+  .plot-sticky{
+    position:sticky; top:0;
+    height:50vh;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse at 50% 40%, var(--ground-2) 0%, var(--ground) 70%);
+  }
+
+  .frame{
+    position:relative;
+    width:min(78vh, 92vw);
+    aspect-ratio:1/1;
+  }
+  .frame svg{ width:100%; height:100%; display:block; overflow:visible; }
+
+  /* graticule / drafting grid */
+  .grid line{ stroke:var(--hairline); stroke-width:.5; }
+  .tick{ stroke:var(--hairline); stroke-width:1; }
+
+  /* the drawn ink */
+  .ink{
+    fill:none;
+    stroke:var(--ink);
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    vector-effect:non-scaling-stroke;
+  }
+  .coast{ stroke-width:1.7; }
+  .district{ stroke:var(--graphite); stroke-width:1; stroke-dasharray:0; }
+
+
+/* colours live here as variables so the whole map re-themes
+   from these six lines. NOTE: no global body/html override —
+   that was what turned your whole page dark. */
+:root{
+  --ground:#ffffff;     /* paper background            */
+  --ground-2:#fafbfc;   /* barely-there centre glow    */
+  --ink:#141414;        /* the BLACK line being drawn   */
+  --graphite:#8a8a8a;   /* district lines + HUD text    */
+  --hairline:#ececf0;   /* faint drafting grid          */
+  --live:#145c37;       /* moving pencil tip (your green)*/
+  --accent:#0e4a2e;     /* secondary accent             */
+}
+
+/* the intro/outro text bands — forced white so they can't
+   inherit a dark background from the page body */
+.filler{
+  min-height:5px;
+  display:flex; align-items:center; justify-content:center;
+  padding:40px 24px; text-align:center;
+  background:#ffffff;
+}
+.filler p{
+  max-width:560px; color:var(--graphite);
+  font-family:'Montserrat', sans-serif;
+  font-size:.82rem; line-height:1.9; letter-spacing:.04em;
+}
+
+/* the scroll stage: tall track + a pinned frame */
+.plot-stage{ position:relative; height:420vh; background:#ffffff; }
+.plot-sticky{
+  position:sticky; top:0;
+  height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+  background:radial-gradient(ellipse at 50% 40%, var(--ground-2) 0%, var(--ground) 70%);
+}
+
+.frame{ position:relative; width:min(78vh, 92vw); aspect-ratio:1/1; }
+.frame svg{ width:100%; height:100%; display:block; overflow:visible; }
+
+/* drafting graticule — kept extremely faint on white */
+.grid line{ stroke:var(--hairline); stroke-width:.5; }
+.tick{ stroke:var(--hairline); stroke-width:1; }
+
+/* the drawn ink */
+.ink{
+  fill:none;
+  stroke:var(--ink);
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
+}
+.coast{ stroke-width:1.7; }
+.district{ stroke:var(--graphite); stroke-width:1; }
+
+.ghost{ fill:none; stroke:#eaeaea; stroke-width:1; }
+
+/* the moving pencil tip */
+#tip{ opacity:0; }
+#tipDot{ fill:var(--live); }
+#tipHalo{ fill:none; stroke:var(--live); stroke-width:1; opacity:.5; }
+.crosshair{ stroke:var(--live); stroke-width:.6; opacity:.35; stroke-dasharray:2 4; }
+
+/* live coordinate readout under the frame */
+.readout{
+  position:absolute; left:0; bottom:-2.6rem;
+  display:flex; gap:1.25rem; flex-wrap:wrap;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--graphite);
+}
+.readout b{ color:var(--live); font-weight:600; }
+
+.titleblock{
+  position:absolute; left:0; top:-4.2rem;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:.66rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--graphite);
+}
+
+/* the name, revealed once the plot completes */
+.cityname{
+  position:absolute; inset:auto 0 38% 0;
+  text-align:center; pointer-events:none;
+  opacity:0; transform:translateY(10px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.cityname.on{ opacity:1; transform:none; }
+.cityname h2{
+  margin:0;
+  font-family:'Archivo Black', sans-serif;   /* matches your hero */
+  font-size:clamp(2rem,6.5vw,4.4rem);
+  letter-spacing:.28em; text-indent:.28em;
+  line-height:1;
+  color:var(--ink);                          /* solid black, no blend mode */
+}
+.cityname span{
+  display:block; margin-top:.9rem;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:.66rem; letter-spacing:.34em; color:var(--accent);
+}
+
+.progressbar{
+  position:absolute; right:0; top:0; bottom:0; width:2px;
+  background:var(--hairline);
+}
+.progressbar i{
+  position:absolute; left:0; top:0; width:100%; height:0%;
+  background:linear-gradient(var(--live),var(--accent));
+}
+
+@media (prefers-reduced-motion: reduce){
+  .plot-stage{ height:auto; }
+  .plot-sticky{ position:static; height:auto; padding:12vh 0; }
+}
+
+
+
+/* code for buttons */
+/* code for buttons (bar + note appear on hover) */
+.stat-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:1rem;
+  max-width:760px;
+  margin:0 auto;                /* centers the row */
+  justify-content:center;
+  --stat-muted:#6b6b66;         /* used by the note */
+  --stat-bar-track:#e5e5e0;     /* used by the bar */
+}
+.stat-btn{
+  flex:1 1 150px;
+  display:flex;
+  flex-direction:column;
+  gap:.35rem;
+  padding:1rem 1.25rem;
+  border:1px solid #d9e5dd;
+  border-radius:14px;
+  background:#ffffff;
+  cursor:pointer;
+  text-align:left;
+  font-family:'Montserrat', sans-serif;
+  transition:transform .18s ease, box-shadow .18s ease,
+             border-color .18s ease, background .18s ease;
+}
+.stat-btn .label{
+  font-size:.72rem;
+  font-weight:600;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#5f7d6c;
+}
+.stat-btn .value{
+  font-size:1.35rem;
+  font-weight:700;
+  color:#0e4a2e;
+  line-height:1.1;
+}
+.stat-btn .value small{
+  font-size:.8rem;
+  font-weight:500;
+  color:#5f7d6c;
+  margin-left:.15rem;
+}
+.stat-btn:hover{
+  transform:translateY(-3px);
+  border-color:#145c37;
+  background:#f4f9f6;
+  box-shadow:0 10px 24px rgba(14,74,46,0.12);
+}
+.stat-btn:active{ transform:translateY(-1px); }
+
+/* the colored bar — hidden until hover */
+.stat-bar{
+  display:flex;
+  height:6px;
+  border-radius:3px;
+  overflow:hidden;
+  margin-top:10px;
+  background:var(--stat-bar-track);
+  opacity:0;
+  transition:opacity .18s ease;
+}
+/* the note under the bar — hidden until hover */
+.stat-note{
+  font-size:11px;
+  color:var(--stat-muted);
+  margin:6px 0 0;
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  transition:max-height .18s ease, opacity .18s ease;
+}
+/* reveal both when hovering the button */
+.stat-btn:hover .stat-bar{ opacity:1; }
+.stat-btn:hover .stat-note{ max-height:40px; opacity:1; }
+
+@media (max-width:560px){
+  .stat-btn{ flex:1 1 45%; }
+}
+/* touch devices have no hover — show bar + note by default */
+@media (hover:none){
+  .stat-bar{ opacity:1; }
+  .stat-note{ max-height:40px; opacity:1; }
+}
+
+/* code for the cards */
+
+.card-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+  gap:16px;
+  max-width:900px;
+  margin:0 auto;
+}
+.card{
+  border-radius:12px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  aspect-ratio:3/4;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+  transition:transform .15s ease;
+  cursor:pointer;
+  text-decoration:none;
+  color:inherit;
+}
+.card:hover{ transform:translateY(-4px); }
+.card-visual{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card-visual i{ font-size:56px; }
+.card-caption{ padding:12px 16px; text-align: center; }
+.card-caption span{
+  font-family:'Montserrat', sans-serif;
+  font-size:15px;
+  font-weight:600;
+}
+/* Mangrove deforestation */
+.card--teal .card-visual{ background:#1D9E75; }
+.card--teal .card-visual i{ color:#E1F5EE; }
+.card--teal .card-caption{ background:#085041; }
+.card--teal .card-caption span{ color:#E1F5EE; }
+/* Average temperature */
+.card--amber .card-visual{ background:#BA7517; }
+.card--amber .card-visual i{ color:#FAEEDA; }
+.card--amber .card-caption{ background:#633806; }
+.card--amber .card-caption span{ color:#FAEEDA; }
+/* Rainfall */
+.card--blue .card-visual{ background:#378ADD; }
+.card--blue .card-visual i{ color:#E6F1FB; }
+.card--blue .card-caption{ background:#0C447C; }
+.card--blue .card-caption span{ color:#E6F1FB; }
+
+@media (max-width:560px){
+  .card-row{ grid-template-columns:repeat(2, 1fr); }
+}
+
+/* footer code */
+
+.site-footer{
+  background: var(--green-900);
+  color: rgba(255,255,255,0.75);
+  font-family: 'Montserrat', sans-serif;
+  padding: 4rem 1.5rem 0;
+}
+.footer-inner{
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 2.5rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.footer-brand .footer-logo{
+  height: 34px;
+  margin-bottom: 1rem;
+}
+.footer-brand p{
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.55);
+  max-width: 260px;
+}
+.footer-col h4{
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+.footer-col ul{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.footer-col ul a{
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.15s ease;
+}
+.footer-col ul a:hover{ color: #ffffff; }
+.footer-social{
+  display: flex;
+  gap: 0.75rem;
+}
+.footer-social a{
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--green-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.footer-social a:hover{
+  background: var(--green-700);
+  transform: translateY(-2px);
+}
+.footer-social i{ font-size: 18px; }
+
+.footer-bottom{
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.5rem 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.45);
+}
+
+@media (max-width: 760px){
+  .footer-inner{ grid-template-columns: 1fr 1fr; }
+  .footer-brand{ grid-column: 1 / -1; }
 }
